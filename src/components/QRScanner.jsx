@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { useNavigate } from 'react-router-dom';
 import { X, Camera } from 'lucide-react';
 
 const READER_ID = 'qr-reader';
@@ -18,7 +17,6 @@ function extractCluePath(text) {
 }
 
 export default function QRScanner({ onClose }) {
-  const navigate = useNavigate();
   const [error, setError] = useState('');
   const scannerRef = useRef(null);
   const handledRef = useRef(false);
@@ -26,6 +24,17 @@ export default function QRScanner({ onClose }) {
   useEffect(() => {
     const scanner = new Html5Qrcode(READER_ID);
     scannerRef.current = scanner;
+
+    // Fully stop the camera, THEN do a real navigation to the clue. A full load
+    // (rather than client-side routing) avoids the clue page mounting while the
+    // camera stream is still tearing down — which left it blank until a reload.
+    const goToClue = (path) => {
+      scanner
+        .stop()
+        .then(() => scanner.clear())
+        .catch(() => {})
+        .finally(() => { window.location.href = path; });
+    };
 
     scanner
       .start(
@@ -36,7 +45,7 @@ export default function QRScanner({ onClose }) {
           const path = extractCluePath(decodedText);
           if (path) {
             handledRef.current = true;
-            scanner.stop().then(() => navigate(path)).catch(() => navigate(path));
+            goToClue(path);
           } else {
             setError("That QR code isn't a hunt clue.");
           }

@@ -194,7 +194,7 @@ export default function Clue() {
         icon={<QrCode className="w-12 h-12 text-primary" />}
         title="JOIN A TEAM FIRST"
         desc="You need to be on a team to participate in the hunt."
-        action={<Link to="/" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Go to Lobby</Link>}
+        action={<Link to="/lobby" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Go to Lobby</Link>}
       />
     );
   }
@@ -205,7 +205,7 @@ export default function Clue() {
         icon={<XCircle className="w-12 h-12 text-destructive" />}
         title="CLUE NOT FOUND"
         desc="This clue doesn't exist or has been removed."
-        action={<Link to="/" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
+        action={<Link to="/lobby" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
       />
     );
   }
@@ -216,7 +216,7 @@ export default function Clue() {
         icon={<Lock className="w-12 h-12 text-primary" />}
         title="NOT YET..."
         desc={`Your team isn't on this clue yet. You're currently on clue #${team?.current_clue_level}.`}
-        action={<Link to="/" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
+        action={<Link to="/lobby" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
       />
     );
   }
@@ -227,7 +227,7 @@ export default function Clue() {
         icon={<XCircle className="w-12 h-12 text-destructive" />}
         title="OUT OF ATTEMPTS"
         desc={`Your team has used all ${attempt?.attempts_allowed ?? 5} attempts on this clue. Ask the host for more attempts to keep going.`}
-        action={<Link to="/" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
+        action={<Link to="/lobby" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
       />
     );
   }
@@ -239,7 +239,7 @@ export default function Clue() {
         title="ALREADY SOLVED!"
         desc="Your team has already completed this clue."
         sub={<div className="flex gap-2 mt-4 flex-wrap justify-center">{allLetters.map((l, i) => <LetterBadge key={i} letter={l} delay={i * 0.1} />)}</div>}
-        action={<Link to="/" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
+        action={<Link to="/lobby" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
       />
     );
   }
@@ -258,7 +258,7 @@ export default function Clue() {
             <p className="text-sm text-muted-foreground mb-2 uppercase tracking-widest">The Final Word</p>
             <p className="font-display text-5xl font-bold text-primary tracking-widest">{allLetters.join('')}</p>
           </div>
-          <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-lg hover:border-primary text-foreground transition-colors">
+          <Link to="/lobby" className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-lg hover:border-primary text-foreground transition-colors">
             <Home className="w-4 h-4" /> Back to Lobby
           </Link>
         </motion.div>
@@ -271,7 +271,7 @@ export default function Clue() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
       <div className="border-b border-border px-6 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
+        <Link to="/lobby" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
           <Home className="w-4 h-4" /> Lobby
         </Link>
         <span className="font-heading text-sm text-primary tracking-widest">CLUE #{clue?.clue_number}</span>
@@ -345,7 +345,7 @@ export default function Clue() {
                     <p className="font-semibold">Correct! You earned the letter:</p>
                     <LetterBadge letter={rewardLetter} delay={0.2} large />
                   </div>
-                  <Link to="/" className="ml-auto flex items-center gap-1 text-sm text-primary hover:underline font-semibold">
+                  <Link to="/lobby" className="ml-auto flex items-center gap-1 text-sm text-primary hover:underline font-semibold">
                     Continue <ArrowRight className="w-4 h-4" />
                   </Link>
                 </motion.div>
