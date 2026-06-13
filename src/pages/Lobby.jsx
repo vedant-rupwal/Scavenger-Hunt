@@ -3,6 +3,7 @@ import { api } from '@/api/client';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, LogIn, QrCode, LogOut, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import AccountModal from '@/components/AccountModal';
 
 function generateJoinCode() {
   return Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -19,6 +20,7 @@ export default function Lobby() {
   const [joinCode, setJoinCode] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -132,7 +134,13 @@ export default function Lobby() {
           <span className="font-heading text-lg font-bold text-primary">HUNT.QR</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground hidden sm:block">{user?.full_name || user?.email}</span>
+          <button
+            onClick={() => setShowAccount(true)}
+            className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block"
+            title="View your account"
+          >
+            {user?.full_name || user?.email}
+          </button>
           <button
             onClick={() => api.auth.logout('/')}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -141,6 +149,15 @@ export default function Lobby() {
           </button>
         </div>
       </nav>
+
+      {showAccount && (
+        <AccountModal
+          user={user}
+          team={team}
+          onClose={() => setShowAccount(false)}
+          onUpdated={(updated) => setUser(updated)}
+        />
+      )}
 
       <div className="max-w-2xl mx-auto px-6 py-12">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
