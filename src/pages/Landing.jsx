@@ -48,14 +48,14 @@ export default function Landing() {
           transition={{ duration: 0.6 }}
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-semibold tracking-widest uppercase mb-6">
-            <Zap className="w-3 h-3" /> QR Scavenger Hunt Platform
+            <Zap className="w-3 h-3" /> QR Scavenger Hunt
           </div>
           <h1 className="font-display text-6xl md:text-8xl font-bold tracking-tight text-foreground mb-4 leading-none text-glow-gold">
             THE HUNT<br />
             <span className="text-primary">BEGINS.</span>
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto mb-10">
-            Build immersive QR code scavenger hunts for any event. Teams race to solve riddles, collect letters, and crack the final code.
+            Join your team, scan the QR codes, and play the scavenger hunt. Teams race to solve riddles, collect letters, and crack the final code.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -95,7 +95,7 @@ export default function Landing() {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-muted-foreground text-sm">
-        © 2026 Hunt.QR — Scavenger Hunt Platform
+        © 2026 Hunt.QR — Scavenger Hunt Platform · Provided by Vedant Rupwal
       </footer>
     </div>
   );

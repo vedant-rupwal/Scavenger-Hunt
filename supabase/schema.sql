@@ -41,6 +41,18 @@ create table if not exists public.clues (
   created_at     timestamptz not null default now()
 );
 
+-- Tracks how many guesses a team has made (and is allowed) on each clue.
+-- Admins can raise attempts_allowed to grant a team extra tries on a clue.
+create table if not exists public.clue_attempts (
+  id               uuid primary key default gen_random_uuid(),
+  team_id          uuid not null references public.teams(id) on delete cascade,
+  clue_id          uuid not null references public.clues(id) on delete cascade,
+  attempts_used    integer not null default 0,
+  attempts_allowed integer not null default 5,
+  created_at       timestamptz not null default now(),
+  unique (team_id, clue_id)
+);
+
 create table if not exists public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
   email      text,
@@ -91,10 +103,11 @@ $$;
 -- Row Level Security
 -- ---------------------------------------------------------------------------
 
-alter table public.events   enable row level security;
-alter table public.teams    enable row level security;
-alter table public.clues    enable row level security;
-alter table public.profiles enable row level security;
+alter table public.events        enable row level security;
+alter table public.teams         enable row level security;
+alter table public.clues         enable row level security;
+alter table public.clue_attempts enable row level security;
+alter table public.profiles      enable row level security;
 
 -- profiles: a user sees and edits only their own row (admins can read all).
 create policy "profiles_select_own" on public.profiles
@@ -125,6 +138,15 @@ create policy "teams_update" on public.teams
   for update to authenticated using (true) with check (true);
 create policy "teams_delete" on public.teams
   for delete to authenticated using (public.is_admin());
+
+-- clue_attempts: players read/create/update their attempt counters; admins too
+-- (admins raise attempts_allowed to grant extra tries).
+create policy "clue_attempts_select" on public.clue_attempts
+  for select to authenticated using (true);
+create policy "clue_attempts_insert" on public.clue_attempts
+  for insert to authenticated with check (true);
+create policy "clue_attempts_update" on public.clue_attempts
+  for update to authenticated using (true) with check (true);
 
 -- ---------------------------------------------------------------------------
 -- Realtime (powers the live "TEAMS (LIVE)" panel in the admin dashboard)

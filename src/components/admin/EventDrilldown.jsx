@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
-import { ArrowLeft, Plus, Pencil, Trash2, QrCode, Users, CheckCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, QrCode, Users, CheckCircle, RefreshCw, Ticket } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ClueForm from './ClueForm';
 import QRModal from './QRModal';
 import EventForm from './EventForm';
+import AttemptsModal from './AttemptsModal';
 
 export default function EventDrilldown({ event, onBack, onRefresh }) {
   const [clues, setClues] = useState([]);
@@ -14,6 +15,7 @@ export default function EventDrilldown({ event, onBack, onRefresh }) {
   const [editingClue, setEditingClue] = useState(null);
   const [qrClue, setQrClue] = useState(null);
   const [editingEvent, setEditingEvent] = useState(false);
+  const [attemptsTeam, setAttemptsTeam] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -211,7 +213,16 @@ export default function EventDrilldown({ event, onBack, onRefresh }) {
                             {(team.member_names || []).join(', ')}
                           </p>
                         </div>
-                        <span className="text-xs text-muted-foreground font-mono">#{team.join_code}</span>
+                        <div className="flex flex-col items-end gap-1.5">
+                          <span className="text-xs text-muted-foreground font-mono">#{team.join_code}</span>
+                          <button
+                            onClick={() => setAttemptsTeam(team)}
+                            className="flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-border hover:border-primary text-muted-foreground hover:text-primary transition-colors"
+                            title="Manage attempts"
+                          >
+                            <Ticket className="w-3.5 h-3.5" /> Attempts
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs text-muted-foreground">
@@ -264,6 +275,13 @@ export default function EventDrilldown({ event, onBack, onRefresh }) {
           existingEvent={event}
           onClose={() => setEditingEvent(false)}
           onSaved={() => { setEditingEvent(false); onRefresh(); }}
+        />
+      )}
+      {attemptsTeam && (
+        <AttemptsModal
+          team={attemptsTeam}
+          clues={clues}
+          onClose={() => setAttemptsTeam(null)}
         />
       )}
     </div>

@@ -176,5 +176,6 @@ export const api = {
     Event: entity('events'),
     Team: entity('teams'),
     Clue: entity('clues'),
+    ClueAttempt: entity('clue_attempts'),
   },
 };

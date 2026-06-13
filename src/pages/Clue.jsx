@@ -15,6 +15,7 @@ export default function Clue() {
   const [feedback, setFeedback] = useState(null); // null | 'correct' | 'wrong'
   const [rewardLetter, setRewardLetter] = useState('');
   const [allLetters, setAllLetters] = useState([]);
+  const [attempt, setAttempt] = useState(null); // this team's attempt counter for this clue
 
   useEffect(() => {
     checkAndLoad();
@@ -68,6 +69,26 @@ export default function Clue() {
         return;
       }
 
+      // Load (or create) this team's attempt counter for this clue.
+      let att = (await api.entities.ClueAttempt.filter({
+        team_id: foundTeam.id,
+        clue_id: foundClue.id,
+      }))[0];
+      if (!att) {
+        att = await api.entities.ClueAttempt.create({
+          team_id: foundTeam.id,
+          clue_id: foundClue.id,
+          attempts_used: 0,
+          attempts_allowed: 5,
+        });
+      }
+      setAttempt(att);
+
+      if (att.attempts_used >= att.attempts_allowed) {
+        setState('out_of_attempts');
+        return;
+      }
+
       setState('active');
     } catch (e) {
       console.error(e);
@@ -84,8 +105,22 @@ export default function Clue() {
     const correct = clue.correct_answer.trim().toLowerCase();
 
     if (normalized !== correct) {
-      setFeedback('wrong');
-      setSubmitting(false);
+      // Wrong guess — burn an attempt and lock the team out if they're spent.
+      try {
+        const used = (attempt?.attempts_used ?? 0) + 1;
+        const updated = await api.entities.ClueAttempt.update(attempt.id, { attempts_used: used });
+        setAttempt(updated);
+        if (used >= updated.attempts_allowed) {
+          setState('out_of_attempts');
+        } else {
+          setFeedback('wrong');
+        }
+      } catch (e) {
+        console.error(e);
+        setFeedback('wrong');
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
 
@@ -172,6 +207,17 @@ export default function Clue() {
     );
   }
 
+  if (state === 'out_of_attempts') {
+    return (
+      <GateScreen
+        icon={<XCircle className="w-12 h-12 text-destructive" />}
+        title="OUT OF ATTEMPTS"
+        desc={`Your team has used all ${attempt?.attempts_allowed ?? 5} attempts on this clue. Ask the host for more attempts to keep going.`}
+        action={<Link to="/" className="px-6 py-3 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90">Back to Lobby</Link>}
+      />
+    );
+  }
+
   if (state === 'already_done') {
     return (
       <GateScreen
@@ -244,6 +290,14 @@ export default function Clue() {
 
           {/* Answer form */}
           <div className="space-y-4">
+            {attempt && state !== 'correct' && (
+              <p className="text-center text-sm text-muted-foreground">
+                <span className={attempt.attempts_allowed - attempt.attempts_used <= 2 ? 'text-destructive font-semibold' : 'text-primary font-semibold'}>
+                  {attempt.attempts_allowed - attempt.attempts_used}
+                </span>{' '}
+                of {attempt.attempts_allowed} attempts left
+              </p>
+            )}
             <input
               value={answer}
               onChange={e => setAnswer(e.target.value)}
