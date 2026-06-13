@@ -27,6 +27,7 @@ create table if not exists public.teams (
   collected_letters  text[] not null default '{}',
   completed          boolean not null default false,
   completed_at       timestamptz,
+  last_solved_by     text,
   created_at         timestamptz not null default now()
 );
 
@@ -51,6 +52,17 @@ create table if not exists public.clue_attempts (
   attempts_allowed integer not null default 5,
   created_at       timestamptz not null default now(),
   unique (team_id, clue_id)
+);
+
+-- One row per solved clue, attributed to the member who answered it.
+-- Powers the per-team leaderboard (riddles solved per member).
+create table if not exists public.clue_solves (
+  id             uuid primary key default gen_random_uuid(),
+  team_id        uuid not null references public.teams(id) on delete cascade,
+  clue_id        uuid not null references public.clues(id) on delete cascade,
+  solved_by_id   uuid,
+  solved_by_name text,
+  created_at     timestamptz not null default now()
 );
 
 create table if not exists public.profiles (
@@ -107,6 +119,7 @@ alter table public.events        enable row level security;
 alter table public.teams         enable row level security;
 alter table public.clues         enable row level security;
 alter table public.clue_attempts enable row level security;
+alter table public.clue_solves   enable row level security;
 alter table public.profiles      enable row level security;
 
 -- profiles: a user sees and edits only their own row (admins can read all).
@@ -147,6 +160,12 @@ create policy "clue_attempts_insert" on public.clue_attempts
   for insert to authenticated with check (true);
 create policy "clue_attempts_update" on public.clue_attempts
   for update to authenticated using (true) with check (true);
+
+-- clue_solves: anyone signed in can read (leaderboard) and add their own solves.
+create policy "clue_solves_select" on public.clue_solves
+  for select to authenticated using (true);
+create policy "clue_solves_insert" on public.clue_solves
+  for insert to authenticated with check (true);
 
 -- ---------------------------------------------------------------------------
 -- Realtime (powers the live "TEAMS (LIVE)" panel in the admin dashboard)

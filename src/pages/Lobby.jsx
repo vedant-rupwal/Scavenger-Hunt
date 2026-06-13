@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Users, Plus, LogIn, QrCode, LogOut, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AccountModal from '@/components/AccountModal';
+import Leaderboard from '@/components/Leaderboard';
+import { toast } from '@/components/ui/use-toast';
 
 function generateJoinCode() {
   return Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -21,11 +23,34 @@ export default function Lobby() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [lbRefresh, setLbRefresh] = useState(0); // bump to reload the leaderboard
   const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Live updates: when ANY member solves a clue, the team row is updated in the
+  // database. Subscribe to UPDATEs on just this team's row so every member's
+  // lobby reflects the new progress instantly — no refresh needed.
+  useEffect(() => {
+    if (!team?.id) return;
+    const unsubscribe = api.entities.Team.subscribe(
+      ({ data }) => {
+        if (!data) return;
+        setTeam((prev) => ({ ...prev, ...data }));
+        setLbRefresh((k) => k + 1);
+        toast({
+          title: 'A teammate scanned a new clue!',
+          description: data.last_solved_by
+            ? `${data.last_solved_by} advanced your team to clue ${data.current_clue_level}.`
+            : `Your team is now on clue ${data.current_clue_level}.`,
+        });
+      },
+      { event: 'UPDATE', filter: `id=eq.${team.id}` }
+    );
+    return unsubscribe;
+  }, [team?.id]);
 
   async function loadData() {
     try {
@@ -211,6 +236,9 @@ export default function Lobby() {
               <p className="text-sm text-muted-foreground mt-1">Create a new team or join one with an invite code.</p>
             </div>
           )}
+
+          {/* Leaderboard (only meaningful once on a team) */}
+          {team && <Leaderboard teamId={team.id} refreshKey={lbRefresh} />}
 
           {/* Actions */}
           {!team && (

@@ -16,6 +16,7 @@ export default function Clue() {
   const [rewardLetter, setRewardLetter] = useState('');
   const [allLetters, setAllLetters] = useState([]);
   const [attempt, setAttempt] = useState(null); // this team's attempt counter for this clue
+  const [me, setMe] = useState(null); // the logged-in user (for solve attribution)
 
   useEffect(() => {
     checkAndLoad();
@@ -30,6 +31,7 @@ export default function Clue() {
       }
 
       const me = await api.auth.me();
+      setMe(me);
       if (!me.team_id) {
         setState('no_team');
         return;
@@ -134,11 +136,23 @@ export default function Clue() {
       const maxClue = Math.max(...allClues.map(c => c.clue_number));
       const isLast = clue.clue_number === maxClue;
 
+      const solverName = me?.full_name || me?.email || 'A teammate';
+
+      // Record who solved this clue (powers the leaderboard) BEFORE updating the
+      // team, so the row exists by the time teammates get the realtime update.
+      await api.entities.ClueSolve.create({
+        team_id: team.id,
+        clue_id: clue.id,
+        solved_by_id: me?.id,
+        solved_by_name: solverName,
+      });
+
       await api.entities.Team.update(team.id, {
         current_clue_level: nextLevel,
         collected_letters: letters,
         completed: isLast,
         completed_at: isLast ? new Date().toISOString() : undefined,
+        last_solved_by: solverName,
       });
 
       setRewardLetter(clue.reward_letter);

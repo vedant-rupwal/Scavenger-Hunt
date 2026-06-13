@@ -84,11 +84,16 @@ function entity(table) {
       return unwrap(await supabase.from(table).delete().eq('id', id));
     },
 
-    // Realtime: invoke `callback({ data: row })` on any insert/update/delete.
-    subscribe(callback) {
+    // Realtime: invoke `callback({ data: row })` on changes.
+    // options.event: 'INSERT' | 'UPDATE' | 'DELETE' | '*' (default '*')
+    // options.filter: a postgres_changes filter string, e.g. `id=eq.${someId}`
+    subscribe(callback, options = {}) {
+      const { event = '*', filter } = options;
+      const binding = { event, schema: 'public', table };
+      if (filter) binding.filter = filter;
       const channel = supabase
-        .channel(`realtime:${table}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+        .channel(`realtime:${table}:${filter ?? 'all'}`)
+        .on('postgres_changes', binding, (payload) => {
           callback({ data: payload.new ?? payload.old, eventType: payload.eventType });
         })
         .subscribe();
@@ -177,5 +182,6 @@ export const api = {
     Team: entity('teams'),
     Clue: entity('clues'),
     ClueAttempt: entity('clue_attempts'),
+    ClueSolve: entity('clue_solves'),
   },
 };
