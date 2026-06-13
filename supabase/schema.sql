@@ -69,6 +69,7 @@ create table if not exists public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
   email      text,
   full_name  text,
+  screen_name text,
   role       text not null default 'player' check (role in ('player', 'admin')),
   team_id    uuid references public.teams(id) on delete set null,
   created_at timestamptz not null default now()
@@ -85,8 +86,13 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name')
+  insert into public.profiles (id, email, full_name, screen_name)
+  values (
+    new.id,
+    new.email,
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'screen_name'
+  )
   on conflict (id) do nothing;
   return new;
 end;

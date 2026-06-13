@@ -9,6 +9,7 @@ import AuthLayout from "@/components/AuthLayout";
 
 export default function Register() {
   const [email, setEmail] = useState("");
+  const [screenName, setScreenName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +25,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      const result = await api.auth.register({ email, password });
+      const result = await api.auth.register({ email, password, screen_name: screenName });
       // With email confirmation off, sign-up returns an active session and
       // the user is logged in immediately. Otherwise send them to log in.
       window.location.href = result?.session ? "/lobby" : "/login";
@@ -56,6 +57,21 @@ export default function Register() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="screen_name">Screen Name</Label>
+          <div className="relative">
+            <Input
+              id="screen_name"
+              type="text"
+              autoComplete="name"
+              placeholder="Your display name"
+              value={screenName}
+              onChange={(e) => setScreenName(e.target.value)}
+              className="h-12"
+              required
+            />
+          </div>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">

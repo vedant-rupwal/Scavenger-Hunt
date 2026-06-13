@@ -46,6 +46,7 @@ async function getCurrentUser() {
     id: user.id,
     email: user.email,
     full_name: profile?.full_name || user.user_metadata?.full_name || user.email,
+    screen_name: profile?.screen_name || user.user_metadata?.screen_name || null,
     role: profile?.role || 'player',
     team_id: profile?.team_id ?? null,
   };
@@ -135,8 +136,14 @@ const auth = {
     });
   },
 
-  async register({ email, password }) {
-    return unwrap(await supabase.auth.signUp({ email, password }));
+  async register({ email, password, screen_name }) {
+    return unwrap(
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: screen_name, screen_name } },
+      })
+    );
   },
 
   async verifyOtp({ email, otpCode }) {

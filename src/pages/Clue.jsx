@@ -136,7 +136,7 @@ export default function Clue() {
       const maxClue = Math.max(...allClues.map(c => c.clue_number));
       const isLast = clue.clue_number === maxClue;
 
-      const solverName = me?.full_name || me?.email || 'A teammate';
+      const solverName = me?.screen_name || me?.full_name || me?.email || 'A teammate';
 
       // Record who solved this clue (powers the leaderboard) BEFORE updating the
       // team, so the row exists by the time teammates get the realtime update.
