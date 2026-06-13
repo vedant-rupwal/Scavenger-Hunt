@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { useNavigate } from 'react-router-dom';
-import { QrCode, Plus, LogOut, ChevronRight, Users, Trophy, Calendar } from 'lucide-react';
+import { QrCode, Plus, LogOut, ChevronRight, Users, Trophy, Calendar, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import EventDrilldown from '../components/admin/EventDrilldown';
 import EventForm from '../components/admin/EventForm';
@@ -48,6 +48,13 @@ export default function Admin() {
 
   function getCompletionsForEvent(eventId) {
     return teams.filter(t => t.event_id === eventId && t.completed).length;
+  }
+
+  async function handleDeleteEvent(e, ev) {
+    e.stopPropagation(); // don't open the drilldown
+    if (!window.confirm(`Delete "${ev.event_name}"? This permanently removes the event and ALL its clues and teams. This cannot be undone.`)) return;
+    await api.entities.Event.delete(ev.id);
+    loadData();
   }
 
   if (loading) {
@@ -171,8 +178,17 @@ export default function Admin() {
                             {ev.status}
                           </span>
                         </td>
-                        <td className="px-5 py-4 text-right">
-                          <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={(e) => handleDeleteEvent(e, ev)}
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
+                              title="Delete event"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          </div>
                         </td>
                       </motion.tr>
                     );
