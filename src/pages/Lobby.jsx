@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { useNavigate } from 'react-router-dom';
-import { Users, Plus, LogIn, QrCode, LogOut, Crown } from 'lucide-react';
+import { Users, Plus, LogIn, QrCode, LogOut, Crown, Camera } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AccountModal from '@/components/AccountModal';
 import Leaderboard from '@/components/Leaderboard';
+import QRScanner from '@/components/QRScanner';
 import { toast } from '@/components/ui/use-toast';
 
 function generateJoinCode() {
@@ -23,6 +24,7 @@ export default function Lobby() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [lbRefresh, setLbRefresh] = useState(0); // bump to reload the leaderboard
   const navigate = useNavigate();
 
@@ -184,6 +186,8 @@ export default function Lobby() {
         />
       )}
 
+      {showScanner && <QRScanner onClose={() => setShowScanner(false)} />}
+
       <div className="max-w-2xl mx-auto px-6 py-12">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <h1 className="font-display text-5xl font-bold mb-2">LOBBY</h1>
@@ -235,6 +239,16 @@ export default function Lobby() {
               <p className="text-muted-foreground">You're not on a team yet.</p>
               <p className="text-sm text-muted-foreground mt-1">Create a new team or join one with an invite code.</p>
             </div>
+          )}
+
+          {/* Scan the next clue's QR right from the app */}
+          {team && (
+            <button
+              onClick={() => setShowScanner(true)}
+              className="w-full flex items-center justify-center gap-2 mb-8 py-4 bg-primary text-primary-foreground font-heading text-lg font-bold rounded-lg hover:opacity-90 transition-opacity glow-gold"
+            >
+              <Camera className="w-5 h-5" /> SCAN CLUE QR
+            </button>
           )}
 
           {/* Leaderboard (only meaningful once on a team) */}
