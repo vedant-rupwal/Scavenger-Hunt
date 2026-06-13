@@ -1,0 +1,31 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "event_name": {
+      "type": "string",
+      "title": "Event Name"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Event Date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active",
+      "title": "Status"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  },
+  "required": [
+    "event_name"
+  ]
+}

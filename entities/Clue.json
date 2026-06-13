@@ -1,0 +1,37 @@
+{
+  "name": "Clue",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "clue_number": {
+      "type": "number",
+      "title": "Clue Number"
+    },
+    "riddle_text": {
+      "type": "string",
+      "title": "Riddle Text"
+    },
+    "correct_answer": {
+      "type": "string",
+      "title": "Correct Answer"
+    },
+    "reward_letter": {
+      "type": "string",
+      "title": "Reward Letter"
+    },
+    "hint": {
+      "type": "string",
+      "title": "Hint (Optional)"
+    }
+  },
+  "required": [
+    "event_id",
+    "clue_number",
+    "riddle_text",
+    "correct_answer",
+    "reward_letter"
+  ]
+}

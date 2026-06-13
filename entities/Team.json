@@ -1,0 +1,58 @@
+{
+  "name": "Team",
+  "type": "object",
+  "properties": {
+    "team_name": {
+      "type": "string",
+      "title": "Team Name"
+    },
+    "join_code": {
+      "type": "string",
+      "title": "Join Code"
+    },
+    "current_clue_level": {
+      "type": "number",
+      "default": 1,
+      "title": "Current Clue Level"
+    },
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "member_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Member IDs"
+    },
+    "member_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Member Names"
+    },
+    "collected_letters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Collected Letters"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "title": "Completed"
+    },
+    "completed_at": {
+      "type": "string",
+      "title": "Completed At"
+    }
+  },
+  "required": [
+    "team_name",
+    "join_code",
+    "event_id"
+  ]
+}
