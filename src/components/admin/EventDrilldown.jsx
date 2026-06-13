@@ -50,6 +50,19 @@ export default function EventDrilldown({ event, onBack, onRefresh }) {
     loadClues();
   }
 
+  async function handleDeleteTeam(team) {
+    if (!window.confirm(`Delete team "${team.team_name}"? Members will be removed from the team. This cannot be undone.`)) return;
+    await api.entities.Team.delete(team.id);
+    loadTeams();
+  }
+
+  async function handleDeleteEvent() {
+    if (!window.confirm(`Delete "${event.event_name}"? This permanently removes the event and ALL its clues and teams. This cannot be undone.`)) return;
+    await api.entities.Event.delete(event.id);
+    onRefresh();
+    onBack();
+  }
+
   const totalClues = clues.length;
   const baseUrl = window.location.origin;
 
@@ -77,6 +90,12 @@ export default function EventDrilldown({ event, onBack, onRefresh }) {
             className="flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-md hover:border-primary transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" /> Edit Event
+          </button>
+          <button
+            onClick={handleDeleteEvent}
+            className="flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-md text-muted-foreground hover:border-destructive hover:text-destructive transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Delete Event
           </button>
         </div>
       </nav>
@@ -215,13 +234,22 @@ export default function EventDrilldown({ event, onBack, onRefresh }) {
                         </div>
                         <div className="flex flex-col items-end gap-1.5">
                           <span className="text-xs text-muted-foreground font-mono">#{team.join_code}</span>
-                          <button
-                            onClick={() => setAttemptsTeam(team)}
-                            className="flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-border hover:border-primary text-muted-foreground hover:text-primary transition-colors"
-                            title="Manage attempts"
-                          >
-                            <Ticket className="w-3.5 h-3.5" /> Attempts
-                          </button>
+                          <div className="flex gap-1.5">
+                            <button
+                              onClick={() => setAttemptsTeam(team)}
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-border hover:border-primary text-muted-foreground hover:text-primary transition-colors"
+                              title="Manage attempts"
+                            >
+                              <Ticket className="w-3.5 h-3.5" /> Attempts
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTeam(team)}
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-border hover:border-destructive text-muted-foreground hover:text-destructive transition-colors"
+                              title="Delete team"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                       <div className="space-y-1">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
-import { X, Plus, Loader2 } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 
 const DEFAULT_ALLOWED = 5;
 
@@ -25,21 +25,21 @@ export default function AttemptsModal({ team, clues, onClose }) {
     setLoading(false);
   }
 
-  async function addAttempts(clue, n) {
+  async function adjustAttempts(clue, n) {
     setBusyClueId(clue.id);
     try {
       const existing = records[clue.id];
+      const current = existing ? existing.attempts_allowed : DEFAULT_ALLOWED;
+      const next = Math.max(0, current + n); // never below zero
       let row;
       if (existing) {
-        row = await api.entities.ClueAttempt.update(existing.id, {
-          attempts_allowed: existing.attempts_allowed + n,
-        });
+        row = await api.entities.ClueAttempt.update(existing.id, { attempts_allowed: next });
       } else {
         row = await api.entities.ClueAttempt.create({
           team_id: team.id,
           clue_id: clue.id,
           attempts_used: 0,
-          attempts_allowed: DEFAULT_ALLOWED + n,
+          attempts_allowed: next,
         });
       }
       setRecords((prev) => ({ ...prev, [clue.id]: row }));
@@ -92,18 +92,33 @@ export default function AttemptsModal({ team, clues, onClose }) {
                       </span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <button
-                      onClick={() => addAttempts(clue, 1)}
-                      disabled={busyClueId === clue.id}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-border text-xs font-semibold hover:border-primary transition-colors disabled:opacity-50"
+                      onClick={() => adjustAttempts(clue, -5)}
+                      disabled={busyClueId === clue.id || allowed <= 0}
+                      className="px-2 py-1.5 rounded-md border border-border text-xs font-semibold hover:border-destructive hover:text-destructive transition-colors disabled:opacity-40"
                     >
-                      {busyClueId === clue.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} 1
+                      −5
                     </button>
                     <button
-                      onClick={() => addAttempts(clue, 5)}
+                      onClick={() => adjustAttempts(clue, -1)}
+                      disabled={busyClueId === clue.id || allowed <= 0}
+                      className="px-2 py-1.5 rounded-md border border-border text-xs font-semibold hover:border-destructive hover:text-destructive transition-colors disabled:opacity-40"
+                    >
+                      −1
+                    </button>
+                    {busyClueId === clue.id && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground mx-0.5" />}
+                    <button
+                      onClick={() => adjustAttempts(clue, 1)}
                       disabled={busyClueId === clue.id}
-                      className="px-2.5 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                      className="px-2 py-1.5 rounded-md border border-border text-xs font-semibold hover:border-primary hover:text-primary transition-colors disabled:opacity-40"
+                    >
+                      +1
+                    </button>
+                    <button
+                      onClick={() => adjustAttempts(clue, 5)}
+                      disabled={busyClueId === clue.id}
+                      className="px-2 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
                     >
                       +5
                     </button>
