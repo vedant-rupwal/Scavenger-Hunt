@@ -75,6 +75,10 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+create unique index if not exists profiles_screen_name_unique
+  on public.profiles (lower(screen_name))
+  where screen_name is not null;
+
 -- ---------------------------------------------------------------------------
 -- New auth user -> profile row
 -- ---------------------------------------------------------------------------
@@ -181,5 +185,5 @@ alter publication supabase_realtime add table public.teams;
 
 -- ---------------------------------------------------------------------------
 -- Make yourself an admin (run after you sign up):
---   update public.profiles set role = 'admin' where email = 'you@example.com';
+--   update public.profiles set role = 'admin' where screen_name = 'your-screen-name';
 -- ---------------------------------------------------------------------------

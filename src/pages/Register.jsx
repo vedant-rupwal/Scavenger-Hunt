@@ -4,11 +4,10 @@ import { api } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { UserPlus, User, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 
 export default function Register() {
-  const [email, setEmail] = useState("");
   const [screenName, setScreenName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,9 +24,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      const result = await api.auth.register({ email, password, screen_name: screenName });
-      // With email confirmation off, sign-up returns an active session and
-      // the user is logged in immediately. Otherwise send them to log in.
+      const result = await api.auth.register({ password, screen_name: screenName });
       window.location.href = result?.session ? "/lobby" : "/login";
     } catch (err) {
       setError(err.message || "Registration failed");
@@ -40,7 +37,7 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Create your account"
-      subtitle="Sign up to get started"
+      subtitle="Choose a screen name and password"
       footer={
         <>
           Already have an account?{" "}
@@ -60,34 +57,22 @@ export default function Register() {
         <div className="space-y-2">
           <Label htmlFor="screen_name">Screen Name</Label>
           <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="screen_name"
               type="text"
-              autoComplete="name"
-              placeholder="Your display name"
+              autoComplete="username"
+              autoFocus
+              placeholder="teamcaptain"
               value={screenName}
               onChange={(e) => setScreenName(e.target.value)}
-              className="h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               className="pl-10 h-12"
               required
             />
           </div>
+          <p className="text-xs text-muted-foreground">
+            Use 3-24 letters, numbers, underscores, or hyphens.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
@@ -97,7 +82,7 @@ export default function Register() {
               id="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10 pr-10 h-12"
@@ -121,7 +106,7 @@ export default function Register() {
               id="confirm"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder="********"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="pl-10 pr-10 h-12"

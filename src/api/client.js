@@ -20,6 +20,22 @@ function stripUndefined(obj) {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 }
 
+function normalizeScreenName(screenName) {
+  return screenName.trim().toLowerCase();
+}
+
+function validateScreenName(screenName) {
+  const normalized = normalizeScreenName(screenName);
+  if (!/^[a-z0-9_-]{3,24}$/.test(normalized)) {
+    throw new Error('Screen name must be 3-24 characters and use only letters, numbers, underscores, or hyphens.');
+  }
+  return normalized;
+}
+
+function screenNameToEmail(screenName) {
+  return `${validateScreenName(screenName)}@huntqr.local`;
+}
+
 // base44 sorted on a `created_date` field; Supabase tables use `created_at`.
 function parseSort(sort) {
   if (!sort) return null;
@@ -30,7 +46,7 @@ function parseSort(sort) {
 }
 
 // Merge the Supabase auth user with its `profiles` row into the flat shape
-// the app expects: { id, email, full_name, role, team_id }.
+// the app expects: { id, email, full_name, screen_name, role, team_id }.
 async function getCurrentUser() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error) throw error;
@@ -45,7 +61,7 @@ async function getCurrentUser() {
   return {
     id: user.id,
     email: user.email,
-    full_name: profile?.full_name || user.user_metadata?.full_name || user.email,
+    full_name: profile?.full_name || profile?.screen_name || user.user_metadata?.screen_name || user.email,
     screen_name: profile?.screen_name || user.user_metadata?.screen_name || null,
     role: profile?.role || 'player',
     team_id: profile?.team_id ?? null,
@@ -125,8 +141,11 @@ const auth = {
     return !!data.session;
   },
 
-  async loginViaEmailPassword(email, password) {
-    return unwrap(await supabase.auth.signInWithPassword({ email, password }));
+  async loginViaScreenNamePassword(screenName, password) {
+    return unwrap(await supabase.auth.signInWithPassword({
+      email: screenNameToEmail(screenName),
+      password,
+    }));
   },
 
   loginWithProvider(provider, redirectPath = '/lobby') {
@@ -136,38 +155,20 @@ const auth = {
     });
   },
 
-  async register({ email, password, screen_name }) {
+  async register({ password, screen_name }) {
+    const normalizedScreenName = validateScreenName(screen_name);
     return unwrap(
       await supabase.auth.signUp({
-        email,
+        email: screenNameToEmail(normalizedScreenName),
         password,
-        options: { data: { full_name: screen_name, screen_name } },
+        options: {
+          data: {
+            full_name: normalizedScreenName,
+            screen_name: normalizedScreenName,
+          },
+        },
       })
     );
-  },
-
-  async verifyOtp({ email, otpCode }) {
-    const data = unwrap(await supabase.auth.verifyOtp({ email, token: otpCode, type: 'email' }));
-    return { access_token: data.session?.access_token };
-  },
-
-  // Session is established automatically by verifyOtp/signIn; kept for API parity.
-  setToken() {},
-
-  async resendOtp(email) {
-    return unwrap(await supabase.auth.resend({ type: 'signup', email }));
-  },
-
-  async resetPasswordRequest(email) {
-    return unwrap(
-      await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      })
-    );
-  },
-
-  async resetPassword({ newPassword }) {
-    return unwrap(await supabase.auth.updateUser({ password: newPassword }));
   },
 
   async logout(redirectUrl) {

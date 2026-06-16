@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { api } from '@/api/client';
-import { X, Mail, Shield, Users, Check, Loader2 } from 'lucide-react';
+import { X, User, Shield, Users, Check, Loader2 } from 'lucide-react';
 
 export default function AccountModal({ user, team, onClose, onUpdated }) {
-  const [name, setName] = useState(user?.full_name || '');
+  const [name, setName] = useState(user?.full_name || user?.screen_name || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const dirty = name.trim() !== (user?.full_name || '');
+  const dirty = name.trim() !== (user?.full_name || user?.screen_name || '');
 
   async function handleSave() {
     if (!dirty || !name.trim()) return;
@@ -35,15 +35,13 @@ export default function AccountModal({ user, team, onClose, onUpdated }) {
         </div>
 
         <div className="space-y-5">
-          {/* Email */}
           <div>
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-widest mb-1">
-              <Mail className="w-3.5 h-3.5" /> Email
+              <User className="w-3.5 h-3.5" /> Screen Name
             </label>
-            <p className="text-foreground font-medium break-all">{user?.email}</p>
+            <p className="text-foreground font-medium break-all">{user?.screen_name || user?.full_name}</p>
           </div>
 
-          {/* Display name (editable) */}
           <div>
             <label className="block text-xs text-muted-foreground uppercase tracking-widest mb-1">
               Display Name
@@ -65,7 +63,6 @@ export default function AccountModal({ user, team, onClose, onUpdated }) {
             </div>
           </div>
 
-          {/* Role */}
           <div>
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-widest mb-1">
               <Shield className="w-3.5 h-3.5" /> Role
@@ -75,7 +72,6 @@ export default function AccountModal({ user, team, onClose, onUpdated }) {
             </span>
           </div>
 
-          {/* Team */}
           <div>
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-widest mb-1">
               <Users className="w-3.5 h-3.5" /> Team
@@ -87,7 +83,7 @@ export default function AccountModal({ user, team, onClose, onUpdated }) {
                   <code className="font-mono text-sm text-primary">{team.join_code}</code>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  On clue level {team.current_clue_level} · {(team.collected_letters || []).length} letters collected
+                  On clue level {team.current_clue_level} - {(team.collected_letters || []).length} letters collected
                 </p>
               </div>
             ) : (
